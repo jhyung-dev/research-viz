@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Research Viz — Jaehyung</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;0,600;1,400&family=IBM+Plex+Sans+KR:wght@300;400;500&display=swap');
+
+:root {
+  --bg:       #0b0d12;
+  --surface:  #111318;
+  --surface2: #181c25;
+  --border:   #232840;
+  --accent:   #4fffb0;
+  --accent2:  #7b8fff;
+  --dim:      #4a5470;
+  --text:     #dde3f0;
+  --muted:    #6b7594;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'IBM Plex Sans KR', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: 0 24px 60px;
+}
+
+/* ── grid noise overlay ── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    repeating-linear-gradient(0deg,   transparent, transparent 39px, var(--border) 39px, var(--border) 40px),
+    repeating-linear-gradient(90deg,  transparent, transparent 39px, var(--border) 39px, var(--border) 40px);
+  opacity: 0.18;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── top bar ── */
+.topbar {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 0 0;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 16px;
+  margin-bottom: 56px;
+}
+.topbar-left {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  color: var(--muted);
+  letter-spacing: 0.5px;
+}
+.topbar-left span { color: var(--accent); }
+.topbar-right {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--dim);
+}
+
+/* ── hero ── */
+.hero {
+  position: relative;
+  z-index: 1;
+  margin-bottom: 64px;
+}
+.hero-tag {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--accent);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+  opacity: 0;
+  animation: fadein .4s .1s forwards;
+}
+.hero h1 {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: clamp(28px, 5vw, 48px);
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -1px;
+  color: var(--text);
+  opacity: 0;
+  animation: slidein .5s .2s forwards;
+}
+.hero h1 em {
+  font-style: normal;
+  color: var(--accent);
+}
+.hero-sub {
+  margin-top: 16px;
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.7;
+  max-width: 520px;
+  opacity: 0;
+  animation: fadein .4s .4s forwards;
+}
+
+/* ── section ── */
+.section {
+  position: relative;
+  z-index: 1;
+  margin-bottom: 52px;
+  opacity: 0;
+  animation: fadein .4s .5s forwards;
+}
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+.section-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.section-line {
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* ── card grid ── */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 14px;
+}
+
+.card {
+  display: block;
+  text-decoration: none;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 22px 24px;
+  transition: border-color .18s, background .18s, transform .18s;
+  position: relative;
+  overflow: hidden;
+}
+.card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, var(--accent) 0%, transparent 60%);
+  opacity: 0;
+  transition: opacity .2s;
+  pointer-events: none;
+}
+.card:hover {
+  border-color: var(--accent2);
+  background: var(--surface2);
+  transform: translateY(-2px);
+}
+.card:hover::after { opacity: 0.04; }
+
+.card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+.card-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+.card-arrow {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 16px;
+  color: var(--dim);
+  transition: color .15s, transform .15s;
+}
+.card:hover .card-arrow {
+  color: var(--accent);
+  transform: translate(2px, -2px);
+}
+
+.card-title {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+.card-desc {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.card-meta {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.tag {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  color: var(--muted);
+}
+.tag-green { border-color: rgba(79,255,176,.3); color: var(--accent); background: rgba(79,255,176,.06); }
+.tag-blue  { border-color: rgba(123,143,255,.3); color: var(--accent2); background: rgba(123,143,255,.06); }
+
+/* ── coming soon card ── */
+.card-soon {
+  opacity: 0.4;
+  pointer-events: none;
+  cursor: default;
+}
+.card-soon:hover { transform: none; border-color: var(--border); }
+
+/* ── footer ── */
+footer {
+  position: relative;
+  z-index: 1;
+  margin-top: auto;
+  padding-top: 32px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  opacity: 0;
+  animation: fadein .4s .7s forwards;
+}
+footer p {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--dim);
+}
+footer span { color: var(--muted); }
+
+/* ── animations ── */
+@keyframes fadein {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes slidein {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">~ / <span>research-viz</span></div>
+  <div class="topbar-right">SKKU ML/AI Lab</div>
+</div>
+
+<div class="hero">
+  <div class="hero-tag">// research-viz</div>
+  <h1>Interactive<br>Research <em>Notes.</em></h1>
+  <p class="hero-sub">RAG 파이프라인 연구를 위한 인터랙티브 레퍼런스 모음. 벤치마크, 평가 지표, 실험 결과를 정리합니다.</p>
+</div>
+
+<div class="section">
+  <div class="section-header">
+    <span class="section-label">RAG</span>
+    <div class="section-line"></div>
+  </div>
+  <div class="cards">
+
+    <a class="card" href="rag/benchmarks.html">
+      <div class="card-top">
+        <div class="card-icon">📊</div>
+        <div class="card-arrow">↗</div>
+      </div>
+      <div class="card-title">Benchmark Overview</div>
+      <div class="card-desc">RAG 평가 벤치마크 26개 정리. QA 수, 사용 방식, Venue별 정렬·필터 가능.</div>
+      <div class="card-meta">
+        <span class="tag tag-green">26 benchmarks</span>
+        <span class="tag tag-blue">2023–2025</span>
+        <span class="tag">sortable</span>
+      </div>
+    </a>
+
+    <a class="card" href="rag/metrics.html">
+      <div class="card-top">
+        <div class="card-icon">📐</div>
+        <div class="card-arrow">↗</div>
+      </div>
+      <div class="card-title">Evaluation Metrics</div>
+      <div class="card-desc">RAG 평가 지표 레퍼런스. Exact Match, ROUGE, Recall@K, MRR 등 수식 포함.</div>
+      <div class="card-meta">
+        <span class="tag tag-green">retrieval</span>
+        <span class="tag tag-blue">generation</span>
+        <span class="tag">formula</span>
+      </div>
+    </a>
+
+    <div class="card card-soon">
+      <div class="card-top">
+        <div class="card-icon">🧪</div>
+        <div class="card-arrow">↗</div>
+      </div>
+      <div class="card-title">Eval Results</div>
+      <div class="card-desc">파이프라인 실험 결과. Retriever · Parser · Chunking 조합별 비교.</div>
+      <div class="card-meta">
+        <span class="tag">coming soon</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<footer>
+  <p>Jaehyung · SKKU · <span>Korean Agricultural RAG</span></p>
+  <p>research-viz</p>
+</footer>
+
+</body>
+</html>
