@@ -1,0 +1,267 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans);font-size:13px;color:var(--color-text-primary)}
+.shell{padding:1.25rem 0 2rem}
+.toolbar{display:flex;flex-wrap:wrap;gap:14px;align-items:flex-start;margin-bottom:1.25rem}
+.fg{display:flex;flex-direction:column;gap:6px}
+.fg-label{font-size:10px;font-weight:500;letter-spacing:.07em;text-transform:uppercase;color:var(--color-text-secondary)}
+.fg-row{display:flex;gap:4px;flex-wrap:wrap}
+.chip{display:inline-flex;align-items:center;padding:4px 11px;border-radius:6px;font-size:12px;font-weight:400;border:1.5px solid var(--color-border-secondary);cursor:pointer;background:var(--color-background-secondary);color:var(--color-text-secondary);transition:all .12s;user-select:none}
+.chip:hover{background:var(--color-background-primary);color:var(--color-text-primary)}
+.chip.on{font-weight:500;border-color:transparent}
+.chip-all.on{background:var(--color-text-primary);color:var(--color-background-primary)}
+.chip-l1.on{background:#455A64;color:#fff}
+.chip-l2.on{background:#1565C0;color:#fff}
+.chip-l3.on{background:#2E7D32;color:#fff}
+.chip-l4.on{background:#E65100;color:#fff}
+.chip-l5.on{background:#6A1B9A;color:#fff}
+.chip-ret.on{background:#283593;color:#fff}
+.chip-gen.on{background:#BF360C;color:#fff}
+.chip-sys.on{background:#5F5E5A;color:#fff}
+.toggle-cb{display:inline-flex;align-items:center;gap:7px;padding:4px 12px 4px 8px;border-radius:6px;font-size:12px;border:1.5px solid var(--color-border-secondary);background:var(--color-background-secondary);color:var(--color-text-secondary);cursor:pointer;transition:all .12s;user-select:none}
+.toggle-cb .dot{width:14px;height:14px;border-radius:3px;border:1.5px solid var(--color-border-secondary);display:flex;align-items:center;justify-content:center;transition:all .12s;flex-shrink:0}
+.chk{display:none;font-size:9px;font-weight:700;color:#fff;line-height:1}
+.toggle-cb.on{border-color:#2E7D32;color:#1B5E20}
+.toggle-cb.on .dot{background:#2E7D32;border-color:#2E7D32}
+.toggle-cb.on .chk{display:block}
+.sep{width:1px;height:36px;background:var(--color-border-tertiary);margin:auto 2px}
+.meta{display:flex;align-items:center;margin-bottom:8px}
+.cnt{font-size:12px;color:var(--color-text-secondary)}
+.sort-bar{display:flex;gap:4px;margin-left:auto;align-items:center}
+.sort-label{font-size:10px;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:.05em;margin-right:2px}
+.sort-btn{font-size:11px;padding:3px 8px;border-radius:4px;border:1px solid var(--color-border-tertiary);background:transparent;color:var(--color-text-secondary);cursor:pointer;transition:all .1s}
+.sort-btn:hover{border-color:var(--color-border-secondary);color:var(--color-text-primary)}
+.sort-btn.on{background:var(--color-text-primary);color:var(--color-background-primary);border-color:var(--color-text-primary)}
+
+.list{display:flex;flex-direction:column;border:0.5px solid var(--color-border-secondary);border-radius:12px;overflow:hidden}
+
+.col-hdr{
+  display:grid;
+  grid-template-columns:minmax(0,2fr) 80px 64px minmax(0,1.2fr) minmax(0,1.4fr) 36px 24px;
+  padding:8px 14px;
+  background:#2C2C2A;
+  border-bottom:1px solid #1a1a18;
+}
+.hcell{font-size:10px;font-weight:500;letter-spacing:.07em;text-transform:uppercase;color:#B4B2A9}
+
+.card{border-bottom:0.5px solid var(--color-border-tertiary)}
+.card:last-child{border-bottom:none}
+.card-row{
+  display:grid;
+  grid-template-columns:minmax(0,2fr) 80px 64px minmax(0,1.2fr) minmax(0,1.4fr) 36px 24px;
+  padding:9px 14px;
+  cursor:pointer;
+  align-items:center;
+  transition:background .1s;
+  background:var(--color-background-primary);
+}
+.card-row:hover{background:var(--color-background-secondary)}
+.card.open .card-row{background:var(--color-background-secondary);border-left:2.5px solid #2E7D32}
+.cell{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding-right:8px}
+.mname{font-weight:500}
+.badge{display:inline-flex;align-items:center;padding:2px 7px;border-radius:4px;font-size:11px;font-weight:500;white-space:nowrap}
+.b-l1{background:#CFD8DC;color:#263238}.b-l2{background:#BBDEFB;color:#0D47A1}
+.b-l3{background:#C8E6C9;color:#1B5E20}.b-l4{background:#FFE0B2;color:#BF360C}
+.b-l5{background:#E1BEE7;color:#4A148C}
+.b-ir{background:#E8EAF6;color:#283593}.b-nlg{background:#FBE9E7;color:#BF360C}.b-llm{background:#EDE7F6;color:#4527A0}
+.cb-y{color:#2E7D32;font-size:14px;font-weight:500;text-align:center}
+.cb-n{color:var(--color-text-secondary);font-size:12px;text-align:center}
+.arr{font-size:13px;color:var(--color-text-secondary);transition:transform .2s;display:flex;align-items:center;justify-content:center}
+.card.open .arr{transform:rotate(90deg);color:#2E7D32}
+.panel{overflow:hidden;max-height:0;transition:max-height .28s cubic-bezier(.4,0,.2,1);border-top:0.5px solid var(--color-border-tertiary)}
+.card.open .panel{max-height:260px}
+.panel-inner{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border-top:2px solid #2E7D32;background:var(--color-background-secondary)}
+.pc{padding:13px 15px;border-right:0.5px solid var(--color-border-tertiary)}
+.pc:last-child{border-right:none}
+.pl{font-size:9px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--color-text-secondary);margin-bottom:6px}
+.pv{font-size:12px;color:var(--color-text-primary);line-height:1.6}
+.pf{font-family:var(--font-mono);font-size:11px;line-height:1.75;color:var(--color-text-primary);white-space:pre-wrap;word-break:break-all}
+.ptags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px}
+.imp-y{background:#C8E6C9;color:#1B5E20;display:inline-flex;align-items:center;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:500}
+.imp-n{background:var(--color-background-primary);color:var(--color-text-secondary);border:0.5px solid var(--color-border-secondary);display:inline-flex;align-items:center;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:500}
+.empty{text-align:center;padding:2.5rem;color:var(--color-text-secondary);font-size:13px}
+
+@media(prefers-color-scheme:dark){
+  .col-hdr{background:#111110;border-bottom-color:#000}
+  .hcell{color:#888780}
+  .b-l1{background:#37474F;color:#ECEFF1}.b-l2{background:#0D47A1;color:#BBDEFB}
+  .b-l3{background:#1B5E20;color:#C8E6C9}.b-l4{background:#BF360C;color:#FFE0B2}
+  .b-l5{background:#4A148C;color:#E1BEE7}
+  .b-ir{background:#1A237E;color:#C5CAE9}.b-nlg{background:#3E2723;color:#FFCCBC}.b-llm{background:#311B92;color:#D1C4E9}
+  .card.open .card-row{border-left-color:#4CAF50}
+  .imp-y{background:#1B5E20;color:#A5D6A7}
+  .card-row{background:var(--color-background-secondary)}
+  .card-row:hover{background:var(--color-background-tertiary)}
+}
+</style>
+
+<div class="shell">
+<div class="toolbar">
+  <div class="fg">
+    <span class="fg-label">Abstraction level</span>
+    <div class="fg-row">
+      <span class="chip chip-all on" data-g="lv" data-v="all" onclick="pick(this)">All</span>
+      <span class="chip chip-l1" data-g="lv" data-v="L1" onclick="pick(this)">L1 · Lexical</span>
+      <span class="chip chip-l2" data-g="lv" data-v="L2" onclick="pick(this)">L2 · Rank</span>
+      <span class="chip chip-l3" data-g="lv" data-v="L3" onclick="pick(this)">L3 · Semantic</span>
+      <span class="chip chip-l4" data-g="lv" data-v="L4" onclick="pick(this)">L4 · NLI</span>
+      <span class="chip chip-l5" data-g="lv" data-v="L5" onclick="pick(this)">L5 · LLM</span>
+    </div>
+  </div>
+  <div class="sep"></div>
+  <div class="fg">
+    <span class="fg-label">Target</span>
+    <div class="fg-row">
+      <span class="chip chip-all on" data-g="tgt" data-v="all" onclick="pick(this)">All</span>
+      <span class="chip chip-ret" data-g="tgt" data-v="Retrieval" onclick="pick(this)">Retrieval</span>
+      <span class="chip chip-gen" data-g="tgt" data-v="Generation" onclick="pick(this)">Generation</span>
+      <span class="chip chip-sys" data-g="tgt" data-v="System" onclick="pick(this)">System</span>
+    </div>
+  </div>
+  <div class="sep"></div>
+  <div class="fg">
+    <span class="fg-label">Implemented</span>
+    <div class="fg-row">
+      <span class="toggle-cb" id="cbT" onclick="toggleCB()">
+        <span class="dot"><span class="chk">✓</span></span>Codebase only
+      </span>
+    </div>
+  </div>
+</div>
+
+<div class="meta">
+  <span class="cnt" id="cnt"></span>
+  <div class="sort-bar">
+    <span class="sort-label">Sort</span>
+    <button class="sort-btn on" data-sk="name" onclick="srt(this)">Name</button>
+    <button class="sort-btn" data-sk="level" onclick="srt(this)">Level</button>
+    <button class="sort-btn" data-sk="cat" onclick="srt(this)">Cat.</button>
+    <button class="sort-btn" data-sk="target" onclick="srt(this)">Target</button>
+    <button class="sort-btn" data-sk="cb" onclick="srt(this)">CB</button>
+  </div>
+</div>
+
+<div class="list">
+  <div class="col-hdr">
+    <span class="hcell">Metric</span>
+    <span class="hcell">Level</span>
+    <span class="hcell">Cat.</span>
+    <span class="hcell">Target</span>
+    <span class="hcell">Unit</span>
+    <span class="hcell" style="text-align:center">CB</span>
+    <span class="hcell"></span>
+  </div>
+  <div id="list-body"></div>
+</div>
+</div>
+
+<script>
+const D=[
+  {name:"Exact Match",level:"L1",cat:"NLG",target:"Generation",unit:"Token sequence",formula:"EM = 𝟙[ŷ = y*]",note:"소문자·구두점 정규화 후 완전 일치. 수치·단위 검증에 적합. 표현 변형에 취약.",cb:true},
+  {name:"ROUGE-1",level:"L1",cat:"NLG",target:"Generation",unit:"Unigram",formula:"F₁ = 2·P·R / (P + R)\n(P, R: unigram overlap)",note:"단어 단위 overlap. 동의어·어순 미반영. 짧은 답변에 유리.",cb:true},
+  {name:"ROUGE-L",level:"L1",cat:"NLG",target:"Generation",unit:"LCS token",formula:"F_lcs = (1+β²)·P_lcs·R_lcs\n       / (P_lcs + β²·R_lcs)",note:"Longest Common Subsequence 기반. 어순 반영, 동의어 미반영. ROUGE-1보다 엄격.",cb:true},
+  {name:"BLEU",level:"L1",cat:"NLG",target:"Generation",unit:"n-gram",formula:"BP · exp( Σ_n wₙ log pₙ )",note:"Precision 중심, Brevity Penalty 포함. Short answer에 불리. 기계번역 기원 지표.",cb:false},
+  {name:"Edit Distance",level:"L1",cat:"NLG",target:"Generation",unit:"Character",formula:"D(s, t) = Levenshtein(s, t)",note:"OCR 노이즈 정량화 특화. 의미 무관·순수 문자 편집 비용만 측정.",cb:false},
+  {name:"Recall@K",level:"L2",cat:"IR",target:"Retrieval",unit:"Document",formula:"Recall@K = |RD ∩ Top_k| / |RD|",note:"정답 문서 중 Top-K에 포함된 비율. 가장 표준적인 retrieval 지표.",cb:true},
+  {name:"Precision@K",level:"L2",cat:"IR",target:"Retrieval",unit:"Document",formula:"P@K = |Rel ∩ Top_k| / k",note:"Top-K 중 실제 정답 비율. Recall과 trade-off.",cb:false},
+  {name:"F1@K (IR)",level:"L2",cat:"IR",target:"Retrieval",unit:"Document",formula:"F1@K = 2·P@K·R@K / (P@K + R@K)",note:"P·R 균형 지표. P, R과 병행 보고 권장.",cb:false},
+  {name:"Token F1",level:"L2",cat:"NLG",target:"Generation",unit:"Token",formula:"F1 = 2·P_tok·R_tok / (P_tok + R_tok)",note:"SQuAD 표준. ROUGE-1과 수식 동일, 단위(token)만 다름.",cb:false},
+  {name:"MRR",level:"L2",cat:"IR",target:"Retrieval",unit:"Document (rank)",formula:"MRR = (1/|Q|) · Σᵢ 1/rank_i",note:"첫 번째 정답 문서의 역순위 평균. 단일 정답 QA 최적. 복수 정답 무시.",cb:true},
+  {name:"MAP",level:"L2",cat:"IR",target:"Retrieval",unit:"Document (rank)",formula:"MAP = (1/|Q|) Σ_q\n  [Σ_k P(k)·rel(k) / |RD_q|]",note:"복수 정답 + binary relevance. MRR보다 포괄적.",cb:false},
+  {name:"NDCG@K",level:"L2",cat:"IR",target:"Retrieval",unit:"Rank + grade",formula:"NDCG@K = DCG@K / IDCG@K\nDCG = Σ (2^rᵢ−1) / log₂(i+1)",note:"Graded relevance 지원. 부분·복수 정답에 유리. 코드베이스 미구현 — 주요 gap.",cb:false},
+  {name:"Hit@K",level:"L2",cat:"IR",target:"Retrieval",unit:"Document (binary)",formula:"Hit@K = 𝟙[∃ d ∈ Top_k : d ∈ RD]",note:"정답 1개면 Recall@K와 동치. 멀티 정답 구분 불가.",cb:false},
+  {name:"BERTScore",level:"L3",cat:"NLG",target:"Generation",unit:"Token embedding",formula:"F_BERT = 2·P_B·R_B / (P_B + R_B)\n(greedy cosine-matched tokens)",note:"Paraphrase·동의어 반영. 임베딩 모델 의존 — 한국어 도메인 모델 선택 중요.",cb:true},
+  {name:"SBERT CosSim",level:"L3",cat:"NLG",target:"Generation",unit:"Sentence emb.",formula:"sim = cos(e_ŷ, e_y*)",note:"문장 단위 의미 유사도. Token-level 세부 비교 불가.",cb:true},
+  {name:"BLEURT",level:"L3",cat:"NLG",target:"Generation",unit:"Token (fine-tuned)",formula:"BERT fine-tuned on human ratings\n→ regression score ∈ ℝ",note:"인간 판단 상관관계 높음. 학습 데이터 분포 의존 — 한국어 농업 도메인 외삽 불확실.",cb:true},
+  {name:"Cosine Diversity",level:"L3",cat:"IR",target:"Retrieval",unit:"Doc embedding",formula:"div = (1/|D|²) Σᵢⱼ cos(dᵢ, dⱼ)",note:"Retrieval 다양성 측정. 값이 낮을수록 다양성 높음.",cb:false},
+  {name:"Entailment (NLI)",level:"L4",cat:"NLG",target:"Generation",unit:"Sentence pair",formula:"P(entail | premise, hyp) via NLI",note:"DeBERTa 등 NLI 모델 사용. Faithfulness 평가 기반.",cb:false},
+  {name:"Groundedness",level:"L4",cat:"NLG",target:"Generation",unit:"Claim–context",formula:"Atomic claim ⊆ context\n(NLI or rule-based)",note:"Hallucination 탐지 핵심. Claim 분해 선행 필요. GT 불필요.",cb:true},
+  {name:"Correctness",level:"L4",cat:"NLG",target:"Generation",unit:"Answer–gold",formula:"NLI entailment or\nsemantic equivalence",note:"EM보다 표현 유연. GT optional. 모델 추론 비용.",cb:true},
+  {name:"SePer",level:"L4",cat:"IR",target:"Retrieval",unit:"Semantic cluster",formula:"Σ_Cᵢ k(Cᵢ,a*)·p_M(Cᵢ|q)\nΔSePer for utility",note:"Reference 불필요. logprob 접근 필요 → closed API 불가.",cb:false},
+  {name:"Atomic Pass Rate",level:"L4",cat:"NLG",target:"Generation",unit:"Atomic fact",formula:"APR = #passed / #total\n(atomic fact checks)",note:"Instruction following 세밀 평가. 복잡한 답변 분석에 강점.",cb:false},
+  {name:"LLM as Judge",level:"L5",cat:"LLM",target:"Generation",unit:"Full response",formula:"Score = LLM(rubric, q, resp)\n→ [1, 5]",note:"인간 판단 상관관계 최고. 재현성 낮음, 버전 의존. 보고 시 버전 명시 필수.",cb:false},
+  {name:"RAGAS Faithfulness",level:"L5",cat:"LLM",target:"Generation",unit:"Claim–context",formula:"Claim decomp.\n→ LLM entailment (few-shot)",note:"WikiEval human corr. 0.95. Reference 불필요. GPT 의존 → 비용·재현성 이슈.",cb:false},
+  {name:"RAGAS Answer Rel.",level:"L5",cat:"LLM",target:"Generation",unit:"Sentence emb.",formula:"Reverse Q gen.\n→ cos(e_q_gen, e_q)",note:"L3+L5 혼합 구조. 역방향 질문 생성 → 원래 질문과 유사도. Reference 불필요.",cb:false},
+  {name:"ARES Classifier",level:"L5",cat:"LLM",target:"Generation",unit:"Triple (q,d,a)",formula:"Fine-tuned DeBERTa\n+ PPI confidence interval",note:"RAGAS 대비 도메인 적응성 높음. 소량 레이블 필요. 통계적 신뢰구간 제공.",cb:false},
+  {name:"Noise Robustness",level:"L1",cat:"IR",target:"System",unit:"Accuracy delta",formula:"Acc(clean) − Acc(noisy)",note:"노이즈 문서 포함 시 성능 유지 정도. RAG 시스템 안정성 지표.",cb:false},
+  {name:"Neg. Rejection",level:"L1",cat:"IR",target:"System",unit:"Reject rate",formula:"P(reject | unanswerable query)",note:"정답 없는 질문에 대한 거절 능력. Hallucination 억제 평가.",cb:false},
+];
+const bc={L1:'b-l1',L2:'b-l2',L3:'b-l3',L4:'b-l4',L5:'b-l5'};
+const bcat={IR:'b-ir',NLG:'b-nlg',LLM:'b-llm'};
+const lvFull={L1:'L1 · Lexical',L2:'L2 · Rank/Stat',L3:'L3 · Semantic',L4:'L4 · NLI/Infer.',L5:'L5 · LLM/Human'};
+let fLv='all',fTgt='all',fCB=false,sk='name',sd=1,openIdx=null;
+function pick(el){
+  const g=el.dataset.g;
+  document.querySelectorAll(`[data-g="${g}"]`).forEach(e=>e.classList.remove('on'));
+  el.classList.add('on');
+  if(g==='lv') fLv=el.dataset.v; else fTgt=el.dataset.v;
+  openIdx=null; render();
+}
+function toggleCB(){
+  fCB=!fCB;
+  document.getElementById('cbT').classList.toggle('on',fCB);
+  openIdx=null; render();
+}
+function srt(btn){
+  document.querySelectorAll('.sort-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  const k=btn.dataset.sk;
+  if(sk===k) sd*=-1; else{sk=k;sd=1;}
+  render();
+}
+function toggleCard(i){openIdx=openIdx===i?null:i; render();}
+function render(){
+  let rows=D.map((d,i)=>({...d,_i:i})).filter(d=>{
+    if(fCB&&!d.cb) return false;
+    if(fLv!=='all'&&d.level!==fLv) return false;
+    if(fTgt!=='all'&&d.target!==fTgt) return false;
+    return true;
+  });
+  if(sk) rows.sort((a,b)=>{
+    let av=a[sk],bv=b[sk];
+    if(typeof av==='boolean') return sd*(av===bv?0:av?-1:1);
+    return sd*String(av).localeCompare(String(bv));
+  });
+  document.getElementById('cnt').textContent=`${rows.length} / ${D.length} metrics`;
+  const body=document.getElementById('list-body');
+  if(!rows.length){body.innerHTML='<div class="empty">해당하는 메트릭 없음</div>';return;}
+  body.innerHTML=rows.map(d=>{
+    const open=openIdx===d._i;
+    return `<div class="card${open?' open':''}">
+  <div class="card-row" onclick="toggleCard(${d._i})">
+    <div class="cell mname">${d.name}</div>
+    <div class="cell"><span class="badge ${bc[d.level]}">${d.level}</span></div>
+    <div class="cell"><span class="badge ${bcat[d.cat]}">${d.cat}</span></div>
+    <div class="cell" style="color:var(--color-text-secondary);font-size:12px">${d.target}</div>
+    <div class="cell" style="color:var(--color-text-secondary);font-size:12px">${d.unit}</div>
+    <div class="cell" style="text-align:center">${d.cb?'<span class="cb-y">✓</span>':'<span class="cb-n">—</span>'}</div>
+    <div class="arr">›</div>
+  </div>
+  <div class="panel">
+    <div class="panel-inner">
+      <div class="pc">
+        <div class="pl">Tags</div>
+        <div class="ptags">
+          <span class="badge ${bc[d.level]}">${lvFull[d.level]}</span>
+          <span class="badge ${bcat[d.cat]}">${d.cat==='IR'?'IR metric':d.cat==='NLG'?'NLG metric':'LLM-based'}</span>
+          <span class="${d.cb?'imp-y':'imp-n'}">${d.cb?'✓ codebase':'not impl.'}</span>
+        </div>
+        <div class="pl">Unit</div>
+        <div class="pv">${d.unit}</div>
+      </div>
+      <div class="pc">
+        <div class="pl">Formula basis</div>
+        <div class="pf">${d.formula}</div>
+      </div>
+      <div class="pc">
+        <div class="pl">Notes / Limitation</div>
+        <div class="pv">${d.note}</div>
+      </div>
+    </div>
+  </div>
+</div>`;
+  }).join('');
+}
+render();
+</script>
