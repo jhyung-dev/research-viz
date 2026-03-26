@@ -87,11 +87,43 @@
     pointer-events: none;
   }
 
+  .filter-groups {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: flex-end;
+  }
+  .filter-group-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .filter-group-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
   .filter-group {
     display: flex;
-    gap: 6px;
+    gap: 4px;
     flex-wrap: wrap;
   }
+  .reset-btn {
+    padding: 6px 12px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-muted);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all .15s;
+    align-self: flex-end;
+  }
+  .reset-btn:hover { border-color: var(--accent3); color: var(--accent3); }
   .filter-btn {
     padding: 6px 12px;
     border-radius: 20px;
@@ -253,6 +285,12 @@
   .venue-arxiv { background: rgba(150,150,150,.1); color: #999; }
   .venue-acm   { background: rgba(255,130,80,.1); color: #ff8250; }
 
+  /* synthetic badges */
+  .badge-syn-llm   { background: rgba(255,200,80,.12); color: #ffd060; border: 1px solid rgba(255,200,80,.3); }
+  .badge-syn-human { background: rgba(79,255,176,.12); color: var(--accent); border: 1px solid rgba(79,255,176,.25); }
+  .badge-syn-mixed { background: rgba(123,143,255,.12); color: var(--accent2); border: 1px solid rgba(123,143,255,.25); }
+  .badge-syn-existing { background: rgba(150,150,150,.1); color: #aaa; border: 1px solid rgba(150,150,150,.2); }
+
   /* qa size color */
   .qa-xl   { color: var(--accent3); }   /* 10k+ */
   .qa-lg   { color: #ffca64; }          /* 2k–10k */
@@ -281,7 +319,7 @@
 
 <div class="page-header">
   <h1>// RAG Benchmark Overview</h1>
-  <p>Table 1 · 25 benchmarks · 2023.09 – 2025.04 · click header to sort</p>
+  <p>Table 1 · 26 benchmarks · 2023.09 – 2025.04 · click header to sort</p>
   <a href="../index.html" style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#7b8fff;text-decoration:none;display:inline-block;margin-top:8px;opacity:0.7;">← back to index</a>
 </div>
 
@@ -289,14 +327,33 @@
   <div class="search-box">
     <input type="text" id="searchInput" placeholder="벤치마크 검색...">
   </div>
-  <div class="filter-group">
-    <button class="filter-btn active" data-filter="all">전체</button>
-    <button class="filter-btn" data-filter="all-use">전체 사용</button>
-    <button class="filter-btn" data-filter="part">일부 사용</button>
-    <button class="filter-btn" data-filter="framework">프레임워크</button>
-    <button class="filter-btn" data-filter="domain">도메인 특화</button>
+  <div class="filter-groups">
+    <div class="filter-group-wrap">
+      <span class="filter-group-label">사용 방식</span>
+      <div class="filter-group">
+        <button class="filter-btn" data-group="usage" data-filter="all-use">전체 사용</button>
+        <button class="filter-btn" data-group="usage" data-filter="part">일부 사용</button>
+        <button class="filter-btn" data-group="usage" data-filter="framework">프레임워크</button>
+      </div>
+    </div>
+    <div class="filter-group-wrap">
+      <span class="filter-group-label">도메인</span>
+      <div class="filter-group">
+        <button class="filter-btn" data-group="domain" data-filter="domain">도메인 특화</button>
+      </div>
+    </div>
+    <div class="filter-group-wrap">
+      <span class="filter-group-label">데이터 생성</span>
+      <div class="filter-group">
+        <button class="filter-btn" data-group="synthetic" data-filter="syn-llm">LLM 합성</button>
+        <button class="filter-btn" data-group="synthetic" data-filter="syn-human">Human</button>
+        <button class="filter-btn" data-group="synthetic" data-filter="syn-mixed">혼합</button>
+        <button class="filter-btn" data-group="synthetic" data-filter="syn-existing">기존 데이터셋</button>
+      </div>
+    </div>
+    <button class="reset-btn" id="resetBtn">초기화</button>
   </div>
-  <div class="stats-bar">표시: <span id="visibleCount">25</span> / 25</div>
+  <div class="stats-bar">표시: <span id="visibleCount">26</span> / 26</div>
 </div>
 
 <div class="table-wrap">
@@ -311,6 +368,7 @@
         <th data-col="usage">사용 방식 <span class="sort-icon">↕</span></th>
         <th data-col="domain">Source Domain <span class="sort-icon">↕</span></th>
         <th data-col="venue">Venue <span class="sort-icon">↕</span></th>
+        <th data-col="synthetic">데이터 생성 <span class="sort-icon">↕</span></th>
         <th data-col="note">Special Points / 비고 <span class="sort-icon">↕</span></th>
       </tr>
     </thead>
@@ -330,6 +388,7 @@ const data = [
     domain: "Post-2022 Wikipedia",
     venue: "EACL 2024", venueKey: "acl",
     domainKey: "general",
+    syntheticKey: "syn-llm", synthetic: "LLM 합성",
     note: "평가 프레임워크. 자체 QA 없음. 남의 데이터 위에 올려 씀. 인용 600+",
   },
   {
@@ -340,6 +399,7 @@ const data = [
     domain: "Real-time news/web",
     venue: "ACL 2024 Findings", venueKey: "acl",
     domainKey: "general",
+    syntheticKey: "syn-human", synthetic: "Human",
     note: "동적 업데이트. 4가지: never/slow/fast-changing + false-premise. >50K human judgments",
   },
   {
@@ -350,6 +410,7 @@ const data = [
     domain: "Multilingual KGs, sci. terms",
     venue: "arXiv", venueKey: "arxiv",
     domainKey: "general",
+    syntheticKey: "syn-existing", synthetic: "기존 데이터셋",
     note: "반사실·편집된 context 테스트. 다국어 지식 그래프 기반",
   },
   {
@@ -360,6 +421,7 @@ const data = [
     domain: "KILT and SuperGLUE corpora",
     venue: "NAACL 2024", venueKey: "naacl",
     domainKey: "general",
+    syntheticKey: "syn-mixed", synthetic: "LLM합성+Human",
     note: "평가 프레임워크. PPI 통계적 신뢰구간. human validation 최소 150개 권고. 인용 300+",
   },
   {
@@ -370,6 +432,7 @@ const data = [
     domain: "Latest news articles",
     venue: "AAAI 2024", venueKey: "aaai",
     domainKey: "general",
+    syntheticKey: "syn-llm", synthetic: "LLM 합성",
     note: "600 base + 200 통합 + 200 반사실. 영/중 각 절반. 4개 testbed: noise, rejection, integration, counterfactual",
   },
   {
@@ -380,6 +443,7 @@ const data = [
     domain: "Daily news (mediastack)",
     venue: "COLM 2024", venueKey: "colm",
     domainKey: "general",
+    syntheticKey: "syn-mixed", synthetic: "LLM합성+Human",
     note: "Multi-hop cross-document. 문서당 2~4개 증거 분산. 인용 200+",
   },
   {
@@ -390,6 +454,7 @@ const data = [
     domain: "Chinese news, domain texts",
     venue: "ACM TOIS", venueKey: "acm",
     domainKey: "domain",
+    syntheticKey: "syn-llm", synthetic: "LLM 합성",
     note: "중국어. Create/Read/Update/Delete 4가지 태스크 분리. 80,000개 뉴스 기반",
   },
   {
@@ -400,6 +465,7 @@ const data = [
     domain: "Medical QA corpora",
     venue: "ACL 2024 Findings", venueKey: "acl",
     domainKey: "domain",
+    syntheticKey: "syn-existing", synthetic: "기존 데이터셋",
     note: "5개 의료 QA 데이터셋 통합. Healthcare domain knowledge. 인용 250+",
   },
   {
@@ -410,6 +476,7 @@ const data = [
     domain: "Federated search tasks",
     venue: "arXiv", venueKey: "arxiv",
     domainKey: "general",
+    syntheticKey: "syn-existing", synthetic: "기존 데이터셋",
     note: "Multi-domain, multi-engine retrieval. BEIR 기반 25개 태스크",
   },
   {
@@ -420,6 +487,7 @@ const data = [
     domain: "Multi-domain corpora",
     venue: "arXiv", venueKey: "arxiv",
     domainKey: "general",
+    syntheticKey: "syn-existing", synthetic: "기존 데이터셋",
     note: "5개 산업 도메인, 12개 서브셋. TRACe framework (Util, Rel, Adh, Compl). Faithfulness",
   },
   {
@@ -430,6 +498,7 @@ const data = [
     domain: "Wikipedia, real-time QA",
     venue: "arXiv", venueKey: "arxiv",
     domainKey: "general",
+    syntheticKey: "syn-existing", synthetic: "기존 데이터셋",
     note: "Adversarial test cases for hallucination detection",
   },
   {
@@ -440,6 +509,7 @@ const data = [
     domain: "College docs with yearly updates",
     venue: "arXiv", venueKey: "arxiv",
     domainKey: "domain",
+    syntheticKey: "syn-llm", synthetic: "LLM 합성",
     note: "중국어 대학 입학 도메인. 6가지 RAG 능력 평가. 정확한 QA 수 논문에서 명시 안 함",
   },
   {
@@ -450,6 +520,7 @@ const data = [
     domain: "3GPP-based domain docs",
     venue: "arXiv", venueKey: "arxiv",
     domainKey: "domain",
+    syntheticKey: "syn-human", synthetic: "Human (SME)",
     note: "Triple-labeled QA from SMEs (telecom context). 통신 도메인 특화",
   },
   {
@@ -460,6 +531,7 @@ const data = [
     domain: "Expert-annotated legal corpora",
     venue: "arXiv", venueKey: "arxiv",
     domainKey: "domain",
+    syntheticKey: "syn-human", synthetic: "Human (전문가)",
     note: "법률 전문가 human annotation. 79M자 코퍼스. Emphasizes strict retrieval of legal text",
   },
   {
@@ -470,6 +542,7 @@ const data = [
     domain: "Finance, law, medical docs",
     venue: "ACL 2025", venueKey: "acl",
     domainKey: "domain",
+    syntheticKey: "syn-llm", synthetic: "LLM 합성",
     note: "Schema-based generation. 7가지 질문 유형 (FQ, IIQ, NCQ, TSQ, MRQ, SQ, YNQ)",
   },
   {
@@ -480,6 +553,7 @@ const data = [
     domain: "Online QA + KILT tasks",
     venue: "arXiv", venueKey: "arxiv",
     domainKey: "general",
+    syntheticKey: "syn-existing", synthetic: "기존 데이터셋",
     note: "Hallucination resilience, dynamic updates. 환각 회복력 특화",
   },
   {
@@ -490,6 +564,7 @@ const data = [
     domain: "Wikipedia-based + socioecon. QA",
     venue: "arXiv", venueKey: "arxiv",
     domainKey: "general",
+    syntheticKey: "syn-existing", synthetic: "기존 데이터셋",
     note: "Fairness metrics, group disparity. 공정성·편향 측정 특화",
   },
   {
@@ -500,6 +575,7 @@ const data = [
     domain: "PDF, DOC, multi-lingual docs",
     venue: "arXiv", venueKey: "arxiv",
     domainKey: "general",
+    syntheticKey: "syn-llm", synthetic: "LLM 합성",
     note: "Full-chain evaluation. Fine-grained chunking, multi-keyword approach",
   },
   {
@@ -510,6 +586,7 @@ const data = [
     domain: "OCR text from scanned docs",
     venue: "arXiv", venueKey: "arxiv",
     domainKey: "general",
+    syntheticKey: "syn-llm", synthetic: "LLM 합성",
     note: "OCR 노이즈의 RAG 성능 영향 분석. Evaluates noise from OCR errors",
   },
   {
@@ -520,6 +597,7 @@ const data = [
     domain: "Financial docs, numeric tasks",
     venue: "EMNLP 2025", venueKey: "emnlp",
     domainKey: "domain",
+    syntheticKey: "syn-mixed", synthetic: "LLM합성+Human",
     note: "5 task classes × 16 financial topics. GPT-4 자동생성+human annotation. Factual correctness",
   },
   {
@@ -530,6 +608,7 @@ const data = [
     domain: "Knowledge graphs + web pages",
     venue: "NeurIPS 2024", venueKey: "neurips",
     domainKey: "general",
+    syntheticKey: "syn-human", synthetic: "Human",
     note: "Meta KDD Cup 2024. 5개 도메인. Multi-entity queries, curated dynamic facts",
   },
   {
@@ -540,6 +619,7 @@ const data = [
     domain: "Curated multi-domain tasks",
     venue: "arXiv", venueKey: "arxiv",
     domainKey: "general",
+    syntheticKey: "syn-human", synthetic: "Human",
     note: "Prompt engineering / user flows. 소규모 curated, multi-domain",
   },
   {
@@ -550,6 +630,7 @@ const data = [
     domain: "Wikipedia, finance, gov, tech docs",
     venue: "ACL 2025 (TACL)", venueKey: "acl",
     domainKey: "general",
+    syntheticKey: "syn-human", synthetic: "Human",
     note: "Multi-turn human-generated. 110 conversations, avg 7.7 turns. IBM Research",
   },
   {
@@ -560,6 +641,7 @@ const data = [
     domain: "Recent Chinese news queries",
     venue: "COLING 2025", venueKey: "arxiv",
     domainKey: "domain",
+    syntheticKey: "syn-mixed", synthetic: "LLM합성+Human",
     note: "fast/slow/never-changing 3분류. 중국어 뉴스 기반. semi-automatic + human annotation",
   },
   {
@@ -570,6 +652,7 @@ const data = [
     domain: "Synthetic needle-in-haystack",
     venue: "arXiv", venueKey: "arxiv",
     domainKey: "general",
+    syntheticKey: "syn-llm", synthetic: "LLM 합성",
     note: "Evaluates extremely long contexts. Modular or black-box approach",
   },
   {
@@ -580,6 +663,7 @@ const data = [
     domain: "Generic multi-domain",
     venue: "arXiv", venueKey: "arxiv",
     domainKey: "general",
+    syntheticKey: "syn-existing", synthetic: "User-provided",
     note: "Modular / black-box approach. Integrates wide metrics (LLM judge)",
   },
 ];
@@ -606,10 +690,20 @@ function getVenueTag(key, text) {
   return `<span class="venue-tag venue-${key}">${text}</span>`;
 }
 
+function getSyntheticBadge(key, label) {
+  const cls = {
+    'syn-llm':      'badge-syn-llm',
+    'syn-human':    'badge-syn-human',
+    'syn-mixed':    'badge-syn-mixed',
+    'syn-existing': 'badge-syn-existing',
+  }[key] || 'badge-syn-existing';
+  return `<span class="badge ${cls}">${label}</span>`;
+}
+
 function renderTable(rows) {
   const tbody = document.getElementById('tableBody');
   tbody.innerHTML = rows.map(r => `
-    <tr data-usage="${r.usageKey}" data-domain="${r.domainKey}">
+    <tr data-usage="${r.usageKey}" data-domain="${r.domainKey}" data-synthetic="${r.syntheticKey}">
       <td class="col-num">${r.num}</td>
       <td class="col-name">${r.name}</td>
       <td class="col-year">${r.year}</td>
@@ -618,6 +712,7 @@ function renderTable(rows) {
       <td class="col-usage">${getUsageBadge(r.usageKey)}</td>
       <td class="col-domain">${r.domain}</td>
       <td class="col-venue">${getVenueTag(r.venueKey, r.venue)}</td>
+      <td class="col-usage">${getSyntheticBadge(r.syntheticKey, r.synthetic)}</td>
       <td class="col-note">${r.note}</td>
     </tr>
   `).join('');
@@ -655,6 +750,7 @@ document.querySelectorAll('thead th[data-col]').forEach(th => {
       else if (col === 'venue')  { va = a.venue;    vb = b.venue; }
       else if (col === 'dataset'){ va = a.dataset;  vb = b.dataset; }
       else if (col === 'domain') { va = a.domain;   vb = b.domain; }
+      else if (col === 'synthetic') { va = a.syntheticKey; vb = b.syntheticKey; }
       else if (col === 'note')   { va = a.note;     vb = b.note; }
       else return 0;
       if (va < vb) return sortAsc ? -1 : 1;
@@ -666,29 +762,29 @@ document.querySelectorAll('thead th[data-col]').forEach(th => {
   });
 });
 
-// filter & search
-let activeFilter = 'all';
+// multi-select filter state: { usage: Set, domain: Set, synthetic: Set }
+const activeFilters = { usage: new Set(), domain: new Set(), synthetic: new Set() };
 
 function applyFilters() {
   const query = document.getElementById('searchInput').value.toLowerCase();
   const rows = document.querySelectorAll('#tableBody tr');
   let visible = 0;
   rows.forEach(row => {
-    const usage = row.dataset.usage;
-    const domain = row.dataset.domain;
-    const text = row.textContent.toLowerCase();
+    const usage    = row.dataset.usage;
+    const domain   = row.dataset.domain;
+    const synthetic = row.dataset.synthetic;
+    const text     = row.textContent.toLowerCase();
 
-    const filterMatch =
-      activeFilter === 'all' ||
-      (activeFilter === 'all-use' && usage === 'all-use') ||
-      (activeFilter === 'part'    && usage === 'part') ||
-      (activeFilter === 'framework' && usage === 'framework') ||
-      (activeFilter === 'domain'  && domain === 'domain');
+    const usageMatch    = activeFilters.usage.size === 0     || activeFilters.usage.has(usage);
+    const domainMatch   = activeFilters.domain.size === 0    || activeFilters.domain.has(domain);
+    const syntheticMatch = activeFilters.synthetic.size === 0 || activeFilters.synthetic.has(synthetic);
+    const searchMatch   = !query || text.includes(query);
 
-    const searchMatch = !query || text.includes(query);
-
-    if (filterMatch && searchMatch) { row.classList.remove('hidden'); visible++; }
-    else row.classList.add('hidden');
+    if (usageMatch && domainMatch && syntheticMatch && searchMatch) {
+      row.classList.remove('hidden'); visible++;
+    } else {
+      row.classList.add('hidden');
+    }
   });
   document.getElementById('visibleCount').textContent = visible;
   document.getElementById('noResults').style.display = visible === 0 ? 'block' : 'none';
@@ -696,11 +792,26 @@ function applyFilters() {
 
 document.querySelectorAll('.filter-btn').forEach(btn => {
   btn.addEventListener('click', () => {
-    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    activeFilter = btn.dataset.filter;
+    const group  = btn.dataset.group;
+    const filter = btn.dataset.filter;
+    if (activeFilters[group].has(filter)) {
+      activeFilters[group].delete(filter);
+      btn.classList.remove('active');
+    } else {
+      activeFilters[group].add(filter);
+      btn.classList.add('active');
+    }
     applyFilters();
   });
+});
+
+document.getElementById('resetBtn').addEventListener('click', () => {
+  activeFilters.usage.clear();
+  activeFilters.domain.clear();
+  activeFilters.synthetic.clear();
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('searchInput').value = '';
+  applyFilters();
 });
 
 document.getElementById('searchInput').addEventListener('input', applyFilters);
